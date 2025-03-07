@@ -18,6 +18,11 @@
 - Framework: django
 - Base de datos: MySQL
 
+## 🤠 Integrantes
+
+- Alejandro Ortiz
+- Andrés Felipe Ortega
+- Tomás Buriticá Jaramillo
 
 
 
