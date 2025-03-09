@@ -1,8 +1,9 @@
-# auth.py - Manejo de autenticación y usuarios
 usuarios = {}
 
 
 def crear_cuenta(usuario, contraseña):
+    if not usuario or not contraseña:  # Evitar usuarios o contraseñas vacíos
+        return False
     if usuario in usuarios:
         return False
     usuarios[usuario] = contraseña
