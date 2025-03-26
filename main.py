@@ -1,9 +1,20 @@
+"""Módulo principal de GestorT.
+
+Este módulo contiene la lógica principal de la aplicación, mostrando menús y gestionando las interacciones del usuario
+para la creación de cuentas, inicio de sesión y administración de tareas.
+"""
+
 # main.py - Punto de entrada del programa
 from src.gt import auth
 from src.gt import tareas
 
 
 def mostrar_menu_principal():
+    """Muestra el menú principal y solicita una opción al usuario.
+
+    Retorna:
+        str: Opción seleccionada por el usuario.
+    """
     print("\n--- Bienvenido a GestorT ---")
     print("1. Iniciar sesión")
     print("2. Crear cuenta")
@@ -12,6 +23,14 @@ def mostrar_menu_principal():
 
 
 def mostrar_menu_usuario(usuario):
+    """Muestra el menú de usuario con opciones para gestionar tareas y cuenta.
+
+    Parámetros:
+        usuario (str): Nombre del usuario actualmente logueado.
+
+    Retorna:
+        str: Opción seleccionada por el usuario.
+    """
     print(f"\n--- Menú de {usuario} ---")
     print("1. Crear tarea")
     print("2. Listar tareas")
@@ -24,6 +43,14 @@ def mostrar_menu_usuario(usuario):
 
 
 def gestionar_tareas(usuario):
+    """Gestiona las operaciones de tareas para un usuario autenticado.
+
+    Permite crear, listar, editar, eliminar y marcar tareas como completadas, 
+    así como cambiar la contraseña del usuario.
+
+    Parámetros:
+        usuario (str): Nombre del usuario.
+    """
     while True:
         opcion = mostrar_menu_usuario(usuario)
 
@@ -108,6 +135,10 @@ def gestionar_tareas(usuario):
 
 
 def main():
+    """Función principal que inicia la aplicación GestorT.
+
+    Muestra el menú principal y dirige al usuario a las operaciones de autenticación y gestión de tareas.
+    """
     while True:
         opcion = mostrar_menu_principal()
 
