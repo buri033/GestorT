@@ -7,6 +7,7 @@ para la creación de cuentas, inicio de sesión y administración de tareas.
 # main.py - Punto de entrada del programa
 from src.gt import auth
 from src.gt import tareas
+import getpass
 
 
 def mostrar_menu_principal():
@@ -144,7 +145,7 @@ def main():
 
         if opcion == "1":
             usuario = input("Usuario: ")
-            contraseña = input("Contraseña: ")
+            contraseña = getpass.getpass("Contraseña: ")
             if auth.iniciar_sesion(usuario, contraseña):
                 print(f"✅ Bienvenido {usuario}!")
                 gestionar_tareas(usuario)
@@ -153,7 +154,7 @@ def main():
 
         elif opcion == "2":
             usuario = input("Nuevo usuario: ")
-            contraseña = input("Nueva contraseña: ")
+            contraseña = getpass.getpass("Nueva contraseña: ")
             if auth.crear_cuenta(usuario, contraseña):
                 print("✅ Cuenta creada exitosamente.")
             else:
