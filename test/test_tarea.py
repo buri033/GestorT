@@ -1,3 +1,9 @@
+"""Módulo de pruebas para la gestión de tareas.
+
+Utiliza pytest para validar el correcto funcionamiento de las operaciones 
+de creación, edición, eliminación y manejo de tareas.
+"""
+
 import pytest
 from src.gt import tareas
 

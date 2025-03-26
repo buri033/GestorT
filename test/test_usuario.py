@@ -1,3 +1,9 @@
+"""Módulo de pruebas para la gestión de usuarios.
+
+Utiliza pytest para validar el correcto funcionamiento de las operaciones de 
+creación de cuenta, inicio de sesión y cambio de contraseña.
+"""
+
 import pytest
 from src.gt import auth
 
