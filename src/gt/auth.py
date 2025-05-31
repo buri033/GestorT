@@ -1,59 +1,47 @@
-"""Módulo de autenticación.
-
-Este módulo contiene funciones para la gestión de cuentas de usuario, 
-como la creación de cuentas, inicio de sesión y cambio de contraseña.
-"""
-
-usuarios = {}
-
+from database.db_open_media import get_db_open_media
 
 def crear_cuenta(usuario, contraseña):
-    """Crea una nueva cuenta de usuario.
-
-    Verifica que el usuario y la contraseña no estén vacíos y que el usuario no exista previamente.
-
-    Parámetros:
-        usuario (str): Nombre del usuario a crear.
-        contraseña (str): Contraseña del usuario.
-
-    Retorna:
-        bool: True si la cuenta se creó exitosamente, False en caso contrario.
-    """
-    if not usuario or not contraseña:  # Evitar usuarios o contraseñas vacíos
+    if not usuario or not contraseña:
         return False
-    if usuario in usuarios:
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+
+    # Verifica si ya existe
+    cursor.execute("SELECT 1 FROM tbl_usuarios WHERE nombre = %s", (usuario,))
+    if cursor.fetchone():
+        cursor.close()
+        conn.close()
         return False
-    usuarios[usuario] = contraseña
+
+    # Crear usuario
+    cursor.execute("INSERT INTO tbl_usuarios (id_usuarios, nombre, clave) VALUES (DEFAULT, %s, %s)", (usuario, contraseña))
+    conn.commit()
+    cursor.close()
+    conn.close()
     return True
 
-
 def iniciar_sesion(usuario, contraseña):
-    """Verifica las credenciales de un usuario.
-
-    Parámetros:
-        usuario (str): Nombre del usuario.
-        contraseña (str): Contraseña del usuario.
-
-    Retorna:
-        bool: True si las credenciales son correctas, False en caso contrario.
-    """
-    return usuarios.get(usuario) == contraseña
-
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+    cursor.execute("SELECT clave FROM tbl_usuarios WHERE nombre = %s", (usuario,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result and result[0] == contraseña
 
 def cambiar_contraseña(usuario, actual, nueva):
-    """Cambia la contraseña de un usuario.
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+    cursor.execute("SELECT clave FROM tbl_usuarios WHERE nombre = %s", (usuario,))
+    result = cursor.fetchone()
 
-    Verifica que la contraseña actual sea correcta antes de realizar el cambio.
-
-    Parámetros:
-        usuario (str): Nombre del usuario.
-        actual (str): Contraseña actual del usuario.
-        nueva (str): Nueva contraseña que se desea establecer.
-
-    Retorna:
-        bool: True si el cambio se realizó correctamente, False en caso contrario.
-    """
-    if usuarios.get(usuario) != actual:
+    if not result or result[0] != actual:
+        cursor.close()
+        conn.close()
         return False
-    usuarios[usuario] = nueva
+
+    cursor.execute("UPDATE tbl_usuarios SET clave = %s WHERE nombre = %s", (nueva, usuario))
+    conn.commit()
+    cursor.close()
+    conn.close()
     return True

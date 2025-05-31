@@ -1,102 +1,110 @@
-# tareas.py - Manejo de tareas
-"""Módulo de gestión de tareas.
+from database.db_open_media import get_db_open_media
 
-Este módulo permite crear, listar, editar, eliminar y marcar tareas como completadas para cada usuario.
-"""
-tareas = {}
-
+def obtener_id_usuario(usuario):
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id_usuarios FROM tbl_usuarios WHERE nombre = %s", (usuario,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result[0] if result else None
 
 def crear_tarea(usuario, titulo, descripcion):
-    """Crea una nueva tarea para un usuario.
-
-    Verifica que los campos no estén vacíos y agrega la tarea a la lista del usuario.
-
-    Parámetros:
-        usuario (str): Nombre del usuario.
-        titulo (str): Título de la tarea.
-        descripcion (str): Descripción de la tarea.
-
-    Retorna:
-        bool: True si la tarea se creó exitosamente, False en caso contrario.
-    """
     if not usuario or not titulo or not descripcion:
-        return False  # Evitar valores vacíos
-    if usuario not in tareas:
-        tareas[usuario] = []
-    tareas[usuario].append({
-        "titulo": titulo,
-        "descripcion": descripcion,
-        "completada": False
-    })
-    return True
+        return False
+    id_usuario = obtener_id_usuario(usuario)
+    if id_usuario is None:
+        return False
 
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO tbl_tareas (id_tarea, titulo, descripcion, fecha_limite, id_usuarios, id_estado)
+        VALUES (DEFAULT, %s, %s, CURRENT_DATE, %s, 2)
+    """, (titulo, descripcion, id_usuario))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
 
 def listar_tareas(usuario):
-    """Lista las tareas de un usuario.
+    id_usuario = obtener_id_usuario(usuario)
+    if id_usuario is None:
+        return []
 
-    Parámetros:
-        usuario (str): Nombre del usuario.
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT titulo, descripcion, id_estado
+        FROM tbl_tareas
+        WHERE id_usuarios = %s
+    """, (id_usuario,))
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
 
-    Retorna:
-        list: Lista de tareas del usuario o una lista vacía si no existen tareas.
-    """
-    return tareas.get(usuario, [])
-
+    return [
+        {"titulo": row[0], "descripcion": row[1], "completada": row[2] == 1}
+        for row in rows
+    ]
 
 def editar_tarea(usuario, indice, nuevo_titulo, nueva_descripcion):
-    """Edita una tarea existente de un usuario.
-
-    Verifica que los nuevos valores no estén vacíos y que el índice de la tarea sea válido.
-
-    Parámetros:
-        usuario (str): Nombre del usuario.
-        indice (int): Índice de la tarea a editar.
-        nuevo_titulo (str): Nuevo título para la tarea.
-        nueva_descripcion (str): Nueva descripción para la tarea.
-
-    Retorna:
-        bool: True si la tarea se editó correctamente, False en caso contrario.
-    """
-    if not nuevo_titulo or not nueva_descripcion:
-        return False  # Evitar editar con valores vacíos
-    if usuario not in tareas or indice < 0 or indice >= len(tareas[usuario]):
+    tareas = listar_tareas(usuario)
+    if indice < 0 or indice >= len(tareas):
         return False
-    tareas[usuario][indice]["titulo"] = nuevo_titulo
-    tareas[usuario][indice]["descripcion"] = nueva_descripcion
-    return True
 
+    tarea = tareas[indice]
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE tbl_tareas SET titulo=%s, descripcion=%s
+        WHERE titulo=%s AND descripcion=%s AND id_usuarios=%s
+    """, (
+        nuevo_titulo, nueva_descripcion,
+        tarea["titulo"], tarea["descripcion"],
+        obtener_id_usuario(usuario)
+    ))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
 
 def eliminar_tarea(usuario, indice):
-    """Elimina una tarea de un usuario.
-
-    Verifica que el usuario y el índice sean válidos.
-
-    Parámetros:
-        usuario (str): Nombre del usuario.
-        indice (int): Índice de la tarea a eliminar.
-
-    Retorna:
-        bool: True si la tarea se eliminó correctamente, False en caso contrario.
-    """
-    if usuario not in tareas or indice < 0 or indice >= len(tareas[usuario]):
+    tareas = listar_tareas(usuario)
+    if indice < 0 or indice >= len(tareas):
         return False
-    del tareas[usuario][indice]
+
+    tarea = tareas[indice]
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+    cursor.execute("""
+        DELETE FROM tbl_tareas
+        WHERE titulo=%s AND descripcion=%s AND id_usuarios=%s
+    """, (
+        tarea["titulo"], tarea["descripcion"],
+        obtener_id_usuario(usuario)
+    ))
+    conn.commit()
+    cursor.close()
+    conn.close()
     return True
 
-
 def marcar_completada(usuario, indice):
-    """Marca una tarea como completada para un usuario.
-
-    Verifica que el usuario y el índice sean válidos.
-
-    Parámetros:
-        usuario (str): Nombre del usuario.
-        indice (int): Índice de la tarea a marcar como completada.
-
-    Retorna:
-        bool: True si la tarea se marcó correctamente como completada, False en caso contrario.
-    """
-    if usuario not in tareas or indice < 0 or indice >= len(tareas[usuario]):
+    tareas = listar_tareas(usuario)
+    if indice < 0 or indice >= len(tareas):
         return False
-    tareas[usuario][indice]["completada"] = True
+
+    tarea = tareas[indice]
+    conn = get_db_open_media()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE tbl_tareas SET id_estado = 1
+        WHERE titulo=%s AND descripcion=%s AND id_usuarios=%s
+    """, (
+        tarea["titulo"], tarea["descripcion"],
+        obtener_id_usuario(usuario)
+    ))
+    conn.commit()
+    cursor.close()
+    conn.close()
     return True

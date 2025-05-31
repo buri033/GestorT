@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Tarea - GestorT</title>
+</head>
+<body>
+    <h2>Editar Tarea</h2>
+    <form method="POST" action="{% url 'edit_task' task.id %}">
+        {% csrf_token %}
+        <label for="title">Título:</label>
+        <input type="text" id="title" name="title" value="{{ task.title }}" required><br>
+
+        <label for="description">Descripción:</label>
+        <textarea id="description" name="description">{{ task.description }}</textarea><br>
+
+        <label for="due_date">Fecha de Vencimiento:</label>
+        <input type="date" id="due_date" name="due_date" value="{{ task.due_date|date:'Y-m-d' }}"><br>
+
+        <label for="completed">Completada:</label>
+        <input type="checkbox" id="completed" name="completed" {% if task.completed %}checked{% endif %}><br>
+
+        <button type="submit">Guardar Cambios</button>
+    </form>
+    <a href="{% url 'tasks' %}">Volver a Mis Tareas</a>
+</body>
+</html>

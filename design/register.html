@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - GestorT</title>
+</head>
+<body>
+    <h2>Crear Cuenta</h2>
+    <form method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
+        <label for="username">Usuario:</label>
+        <input type="text" id="username" name="username" required><br>
+
+        <label for="email">Correo Electrónico:</label>
+        <input type="email" id="email" name="email" required><br>
+
+        <label for="password1">Contraseña:</label>
+        <input type="password" id="password1" name="password1" required><br>
+
+        <label for="password2">Confirmar Contraseña:</label>
+        <input type="password" id="password2" name="password2" required><br>
+
+        <button type="submit">Registrarse</button>
+    </form>
+    <p>¿Ya tienes una cuenta? <a href="{% url 'login' %}">Inicia sesión aquí</a></p>
+</body>
+</html>
